@@ -590,6 +590,35 @@ def create_app():
 
 
 app = create_app()
+@app.route('/setup-db-init')
+def setup_db_init():
+    try:
+        db.create_all()
+        return "Database initialized successfully!", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
+@app.route('/setup-admin-create')
+def setup_admin_create():
+    try:
+        email = "mdmasterdan@gmail.com"
+        if AdminUser.query.filter_by(email=email).first():
+            return "Admin account already exists!", 200
+        
+        user = AdminUser(
+            email=email,
+            name="Developer Admin",
+            role="developer",
+            verified_note="Developer - platform founder"
+        )
+        # Set your default initial password here
+        user.set_password("ChangeMe123!")
+        
+        db.session.add(user)
+        db.session.commit()
+        return f"Admin account created for {email}!", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+        
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
